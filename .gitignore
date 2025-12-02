@@ -1,28 +1,85 @@
-# Dependencies
-node_modules/
-package-lock.json
-yarn.lock
-pnpm-lock.yaml
+# Java compiled classes
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
 
-# Build output
+# Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Gradle
+.gradle/
 build/
-dist/
-*.tsbuildinfo
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Spring Boot
+spring-boot-*.log
+*.log.*
 
 # Environment variables
 .env
 .env.local
 .env.*.local
+application-local.properties
+application-local.yml
 
-# IDE
-.vscode/
+# IDE - IntelliJ IDEA
 .idea/
+*.iws
+*.iml
+*.ipr
+out/
+!**/src/main/**/out/
+!**/src/test/**/out/
+
+# IDE - Eclipse
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+bin/
+!**/src/main/**/bin/
+!**/src/test/**/bin/
+
+# IDE - VS Code
+.vscode/
+*.code-workspace
+
+# IDE - NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+
+# IDE - Vim
 *.swp
 *.swo
 *~
 
 # OS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
 # Logs
@@ -31,3 +88,15 @@ logs/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Node modules (if any frontend assets)
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
+*~.nib
