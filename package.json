@@ -13,13 +13,6 @@
     "dev": "tsc && node build/index.js",
     "watch": "tsc --watch"
   },
-  "keywords": [
-    "mcp",
-    "model-context-protocol",
-    "commercetools",
-    "customer",
-    "customer-group"
-  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
