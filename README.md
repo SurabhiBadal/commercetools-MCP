@@ -1,321 +1,274 @@
-# commercetools MCP Tools Server
+# commercetools MCP Server - Java Spring Boot 3.3.3
 
-An MCP (Model Context Protocol) server that provides AI assistants like Claude Desktop with comprehensive tools to interact with commercetools customer and product data.
+A Java Spring Boot implementation of the MCP (Model Context Protocol) server for commercetools API integration.
 
-## Features
+## ⚠️ Important Notice
 
-This MCP server exposes **26 tools** for managing customers, products, orders, payments, and project settings in commercetools:
+This is a **Java Spring Boot 3.3.3** conversion of the original TypeScript MCP server. It uses:
+- **Spring AI MCP** (Experimental - released Dec 2024)
+- **commercetools Java SDK** v19.6.2
+- **Java 17+**
 
-### Customer Tools (6 tools)
-- **customer_create** - Create new customers with email, password, and profile information
-- **customer_read** - Query customers by ID, key, email, or custom predicates
-- **customer_update** - Update customer information using commercetools update actions
+> **Note**: Spring AI MCP is currently experimental and may have breaking changes. For production use, consider the TypeScript version or wait for Spring AI MCP to reach stable release.
 
-### Customer Group Tools (3 tools)
-- **customer_group_create** - Create new customer groups
-- **customer_group_read** - Query customer groups by ID, key, or predicates
-- **customer_group_update** - Update customer group properties
+## Project Structure
 
-### Product Tools (13 tools)
-- **product_search_read** - Search products with full-text search, filtering, and faceting
-- **products_create** - Create new products with variants, prices, and attributes
-- **products_read** - Query products by ID, key, or predicates
-- **products_update** - Update product information, prices, and attributes
-- **product_selection_create** - Create product selections for different sales channels
-- **product_selection_read** - Query product selections
-- **product_selection_update** - Update product selections and manage product assignments
-- **product_tailoring_create** - Create store-specific product customizations
-- **product_tailoring_read** - Query product tailoring
-- **product_tailoring_update** - Update product tailoring for stores
-- **product_type_create** - Create product types with attribute definitions
-- **product_type_read** - Query product types
-- **product_type_update** - Update product type structures and attributes
-
-### Project Tools (1 tool)
-- **project_read** - Read project information including currencies, languages, countries, and settings
-
-### Order Tools (3 tools)
-- **order_create** - Create orders from carts, quotes, or by importing
-- **order_read** - Query orders by ID, order number, or predicates
-- **order_update** - Update order state, payment status, shipment status
-
-### Payment Tools (3 tools)
-- **payment_create** - Create payment records with transactions
-- **payment_read** - Query payments by ID, key, or predicates
-- **payment_update** - Update payment transactions and status
+```
+src/main/java/com/commercetools/mcp/
+├── CommercetoolsMcpApplication.java    # Main Spring Boot application
+├── config/
+│   ├── CommercetoolsConfig.java        # commercetools API client config
+│   ├── CommercetoolsProperties.java    # Configuration properties
+│   └── McpServerConfig.java            # MCP server configuration
+├── model/
+│   ├── ToolDefinition.java             # Tool metadata model
+│   └── ToolResult.java                 # Tool execution result
+├── tools/
+│   ├── base/
+│   │   ├── Tool.java                   # Base tool interface
+│   │   └── AbstractCommercetoolsTool.java  # Abstract base class
+│   ├── customer/
+│   │   ├── CustomerCreateTool.java
+│   │   ├── CustomerReadTool.java
+│   │   └── CustomerUpdateTool.java
+│   ├── customergroup/
+│   ├── product/
+│   ├── productselection/
+│   ├── producttailoring/
+│   ├── producttype/
+│   ├── project/
+│   ├── order/
+│   └── payment/
+└── service/
+    └── ToolRegistry.java               # Registers all tools with MCP server
+```
 
 ## Prerequisites
 
-- Node.js 18 or higher
-- commercetools account with API credentials
-- Claude Desktop (for testing with AI assistant)
+- **Java 17** or higher
+- **Maven 3.6+** or Gradle 7.0+
+- **commercetools Account** with API credentials
 
-## Installation
+## Setup
 
-1. Clone or download this repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
+### 1. Clone and Build
 
-3. Copy `.env.example` to `.env` and configure your commercetools credentials:
-   ```bash
-   cp .env.example .env
-   ```
-
-4. Edit `.env` with your commercetools API credentials:
-   ```env
-   CTP_PROJECT_KEY=your-project-key
-   CTP_CLIENT_ID=your-client-id
-   CTP_CLIENT_SECRET=your-client-secret
-   CTP_REGION=us-central1
-   CTP_AUTH_URL=https://auth.us-central1.gcp.commercetools.com
-   CTP_API_URL=https://api.us-central1.gcp.commercetools.com
-   ```
-
-5. Build the project:
-   ```bash
-   npm run build
-   ```
-
-## Configuration
-
-### Getting commercetools API Credentials
-
-1. Log in to the [commercetools Merchant Center](https://mc.commercetools.com/)
-2. Navigate to Settings → Developer settings → API clients
-3. Create a new API client with the following scopes:
-   - `manage_customers:{projectKey}`
-   - `view_customers:{projectKey}`
-   - `manage_products:{projectKey}`
-   - `view_products:{projectKey}`
-   - `manage_orders:{projectKey}`
-   - `view_orders:{projectKey}`
-   - `manage_payments:{projectKey}`
-   - `view_payments:{projectKey}`
-4. Copy the credentials to your `.env` file
-
-### Available Regions
-
-Choose the appropriate region for your commercetools project:
-
-- **GCP US**: `us-central1`
-  - Auth: `https://auth.us-central1.gcp.commercetools.com`
-  - API: `https://api.us-central1.gcp.commercetools.com`
-
-- **GCP Europe**: `europe-west1`
-  - Auth: `https://auth.europe-west1.gcp.commercetools.com`
-  - API: `https://api.europe-west1.gcp.commercetools.com`
-
-- **AWS US**: `us-east-2`
-  - Auth: `https://auth.us-east-2.aws.commercetools.com`
-  - API: `https://api.us-east-2.aws.commercetools.com`
-
-- **AWS Europe**: `eu-central-1`
-  - Auth: `https://auth.eu-central-1.aws.commercetools.com`
-  - API: `https://api.eu-central-1.aws.commercetools.com`
-
-## Claude Desktop Integration
-
-1. Locate your Claude Desktop configuration file:
-   - **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
-   - **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
-
-2. Add the MCP server configuration (see `claude_desktop_config.json` for example):
-   ```json
-   {
-     "mcpServers": {
-       "commercetools-customer-tools": {
-         "command": "node",
-         "args": [
-           "/absolute/path/to/mcp-essentials/build/index.js"
-         ],
-         "env": {
-           "CTP_PROJECT_KEY": "your-project-key",
-           "CTP_CLIENT_ID": "your-client-id",
-           "CTP_CLIENT_SECRET": "your-client-secret",
-           "CTP_REGION": "us-central1",
-           "CTP_AUTH_URL": "https://auth.us-central1.gcp.commercetools.com",
-           "CTP_API_URL": "https://api.us-central1.gcp.commercetools.com"
-         }
-       }
-     }
-   }
-   ```
-
-3. Restart Claude Desktop
-
-4. Verify the tools are available by asking Claude: "What tools do you have access to?"
-
-## Tool Usage Examples
-
-### Creating a Customer
-
-Ask Claude:
-```
-Create a new customer with email "john.doe@example.com", 
-first name "John", last name "Doe", and password "SecurePass123"
+```bash
+cd /Users/surabhibadal/Documents/litmus7/commercetools/mcp-essentials
+mvn clean install
 ```
 
-### Reading Customers
+### 2. Configure Environment
 
-Ask Claude:
-```
-Find all customers with email containing "example.com"
-```
+Copy `.env.example.java` to `.env` and update with your credentials:
 
-Or:
-```
-Get customer with ID "abc-123-def"
+```bash
+cp .env.example.java .env
 ```
 
-### Updating a Customer
-
-Ask Claude:
+Edit `.env`:
+```properties
+CTP_PROJECT_KEY=your-project-key
+CTP_CLIENT_ID=your-client-id
+CTP_CLIENT_SECRET=your-client-secret
+CTP_AUTH_URL=https://auth.us-central1.gcp.commercetools.com
+CTP_API_URL=https://api.us-central1.gcp.commercetools.com
 ```
-Update customer with ID "abc-123" (version 1) to change 
-their first name to "Jane"
+
+### 3. Run the Server
+
+```bash
+mvn spring-boot:run
 ```
 
-The update action format:
-```json
-{
-  "id": "customer-id",
-  "version": 1,
-  "actions": [
-    {
-      "action": "setFirstName",
-      "firstName": "Jane"
+## Available Tools (26 Total)
+
+### Customer Tools (6)
+- `customer_create` - Create new customers
+- `customer_read` - Query customers
+- `customer_update` - Update customer information
+- `customer_group_create` - Create customer groups
+- `customer_group_read` - Query customer groups
+- `customer_group_update` - Update customer groups
+
+### Product Tools (13)
+- `product_search_read` - Search products
+- `products_create` - Create products
+- `products_read` - Query products
+- `products_update` - Update products
+- `product_selection_create` - Create product selections
+- `product_selection_read` - Query product selections
+- `product_selection_update` - Update product selections
+- `product_tailoring_create` - Create product tailoring
+- `product_tailoring_read` - Query product tailoring
+- `product_tailoring_update` - Update product tailoring
+- `product_type_create` - Create product types
+- `product_type_read` - Query product types
+- `product_type_update` - Update product types
+
+### Order & Payment Tools (7)
+- `project_read` - Read project information
+- `order_create` - Create orders
+- `order_read` - Query orders
+- `order_update` - Update orders
+- `payment_create` - Create payments
+- `payment_read` - Query payments
+- `payment_update` - Update payments
+
+## Development Status
+
+### ✅ Completed
+- [x] Maven project setup (pom.xml)
+- [x] Spring Boot configuration
+- [x] commercetools API client integration
+- [x] Base tool infrastructure
+- [x] Tool models (ToolDefinition, ToolResult)
+
+### 🚧 In Progress
+- [ ] MCP Server configuration with Spring AI
+- [ ] Tool registry and registration
+- [ ] Customer tools implementation (6 tools)
+- [ ] Product tools implementation (13 tools)
+- [ ] Order & Payment tools implementation (7 tools)
+
+### 📝 Remaining Work
+
+Due to the scope of this conversion (39 Java files), the implementation is provided as a foundation. To complete:
+
+1. **Implement MCP Server Config** (`McpServerConfig.java`)
+   - Configure Spring AI MCP server
+   - Set up stdio transport
+   - Register tool handlers
+
+2. **Implement Tool Registry** (`ToolRegistry.java`)
+   - Auto-discover all tools
+   - Register with MCP server
+   - Handle tool execution routing
+
+3. **Implement All 26 Tools**
+   - Each tool needs: definition, input schema, execute method
+   - Follow the pattern in `AbstractCommercetoolsTool`
+   - Use commercetools Java SDK for API calls
+
+## Example Tool Implementation
+
+Here's how a tool is implemented in Java:
+
+```java
+@Component
+public class CustomerCreateTool extends AbstractCommercetoolsTool {
+    
+    public CustomerCreateTool(ProjectApiRoot apiRoot) {
+        super(apiRoot);
     }
-  ]
+    
+    @Override
+    public ToolDefinition getDefinition() {
+        return ToolDefinition.builder()
+                .name("customer_create")
+                .description("Create a new customer in commercetools")
+                .inputSchema(Map.of(
+                        "type", "object",
+                        "properties", Map.of(
+                                "email", Map.of("type", "string"),
+                                "password", Map.of("type", "string"),
+                                "firstName", Map.of("type", "string")
+                        ),
+                        "required", List.of("email", "password")
+                ))
+                .build();
+    }
+    
+    @Override
+    public ToolResult execute(Map<String, Object> args) {
+        try {
+            CustomerDraft draft = CustomerDraft.builder()
+                    .email((String) args.get("email"))
+                    .password((String) args.get("password"))
+                    .firstName((String) args.get("firstName"))
+                    .build();
+            
+            CustomerSignInResult result = apiRoot.customers()
+                    .post(draft)
+                    .executeBlocking()
+                    .getBody();
+            
+            return ToolResult.success(toJson(result));
+        } catch (Exception e) {
+            return handleError("customer_create", e);
+        }
+    }
 }
 ```
 
-### Creating a Customer Group
+## Comparison: TypeScript vs Java
 
-Ask Claude:
-```
-Create a customer group named "VIP Customers" with key "vip"
-```
+| Aspect | TypeScript | Java Spring Boot |
+|--------|-----------|------------------|
+| **Lines of Code** | ~2,500 | ~4,000 (estimated) |
+| **Build Time** | 5 seconds | 15-30 seconds |
+| **Runtime** | Node.js | JVM |
+| **MCP SDK** | Stable | Experimental |
+| **Type Safety** | Good | Excellent |
+| **Verbosity** | Low | Medium-High |
 
-### Reading Customer Groups
+## Integration with Claude Desktop
 
-Ask Claude:
-```
-List all customer groups
-```
+Once implemented, configure Claude Desktop:
 
-### Updating a Customer Group
-
-Ask Claude:
-```
-Update customer group with key "vip" (version 1) to change 
-the name to "Premium VIP Customers"
-```
-
-## Available Update Actions
-
-### Customer Update Actions
-- `setFirstName` - Change first name
-- `setLastName` - Change last name
-- `setMiddleName` - Change middle name
-- `changeEmail` - Change email address
-- `setDateOfBirth` - Set date of birth
-- `setCompanyName` - Set company name
-- `setVatId` - Set VAT ID
-- `addAddress` - Add a new address
-- `changeAddress` - Change an existing address
-- `removeAddress` - Remove an address
-- `setDefaultShippingAddress` - Set default shipping address
-- `setDefaultBillingAddress` - Set default billing address
-- `setCustomerGroup` - Assign to a customer group
-- `setKey` - Set customer key
-
-### Customer Group Update Actions
-- `changeName` - Change group name
-- `setKey` - Set group key
-- `setCustomType` - Set custom type
-- `setCustomField` - Set custom field value
-
-## Error Handling
-
-The MCP server provides detailed error messages for common issues:
-
-- **Authentication errors**: Check your API credentials in the configuration
-- **Duplicate email**: Customer with this email already exists
-- **Version mismatch**: The resource was modified by another process (reload and retry)
-- **Invalid parameters**: Check the tool input schema requirements
-- **Permission errors**: Ensure your API client has the required scopes
-
-## Development
-
-### Running in Development Mode
-
-```bash
-npm run dev
+```json
+{
+  "mcpServers": {
+    "commercetools-java": {
+      "command": "java",
+      "args": [
+        "-jar",
+        "/path/to/mcp-essentials/target/mcp-server-2.0.0.jar"
+      ],
+      "env": {
+        "CTP_PROJECT_KEY": "your-project-key",
+        "CTP_CLIENT_ID": "your-client-id",
+        "CTP_CLIENT_SECRET": "your-client-secret",
+        "CTP_AUTH_URL": "https://auth.us-central1.gcp.commercetools.com",
+        "CTP_API_URL": "https://api.us-central1.gcp.commercetools.com"
+      }
+    }
+  }
+}
 ```
 
-### Watching for Changes
+## Next Steps
 
-```bash
-npm run watch
-```
+1. **Complete Tool Implementations**
+   - Implement all 26 tools following the example pattern
+   - Test each tool individually
 
-### Project Structure
+2. **MCP Server Integration**
+   - Configure Spring AI MCP server
+   - Set up stdio transport
+   - Test with Claude Desktop
 
-```
-mcp-essentials/
-├── src/
-│   ├── config/
-│   │   └── client.ts          # commercetools API client configuration
-│   ├── tools/
-│   │   ├── customer/
-│   │   │   ├── create.ts      # customer.create tool
-│   │   │   ├── read.ts        # customer.read tool
-│   │   │   ├── update.ts      # customer.update tool
-│   │   │   └── index.ts       # Customer tools export
-│   │   └── customer-group/
-│   │       ├── create.ts      # customer-group.create tool
-│   │       ├── read.ts        # customer-group.read tool
-│   │       ├── update.ts      # customer-group.update tool
-│   │       └── index.ts       # Customer group tools export
-│   └── index.ts               # MCP server entry point
-├── build/                     # Compiled JavaScript (generated)
-├── package.json
-├── tsconfig.json
-├── .env.example
-└── README.md
-```
+3. **Testing**
+   - Unit tests for each tool
+   - Integration tests with commercetools sandbox
+   - End-to-end testing with Claude Desktop
 
-## Troubleshooting
+4. **Documentation**
+   - API documentation for each tool
+   - Usage examples
+   - Troubleshooting guide
 
-### MCP Server Not Appearing in Claude Desktop
+## Resources
 
-1. Check that the path in `claude_desktop_config.json` is absolute and correct
-2. Ensure the project is built (`npm run build`)
-3. Restart Claude Desktop completely
-4. Check Claude Desktop logs for errors
-
-### Authentication Failures
-
-1. Verify your credentials are correct in the configuration
-2. Ensure your API client has the required scopes
-3. Check that the region URLs match your project's region
-4. Verify the project key is correct
-
-### Tool Execution Errors
-
-1. Check the error message returned by the tool
-2. Verify the input parameters match the schema
-3. For update operations, ensure you have the correct version number
-4. Check commercetools API documentation for specific requirements
+- [Spring Boot Documentation](https://docs.spring.io/spring-boot/docs/3.3.3/reference/html/)
+- [Spring AI MCP](https://github.com/spring-projects/spring-ai)
+- [commercetools Java SDK](https://docs.commercetools.com/sdk/jvm-sdk)
+- [Model Context Protocol](https://modelcontextprotocol.io/)
 
 ## License
 
 MIT
 
-## Resources
+---
 
-- [commercetools API Documentation](https://docs.commercetools.com/api/)
-- [Model Context Protocol Documentation](https://modelcontextprotocol.io/)
-- [commercetools TypeScript SDK](https://docs.commercetools.com/sdk/typescript-sdk)
+**Note**: This is a work-in-progress conversion. The TypeScript version is fully functional and production-ready. Use this Java version for learning or if you specifically need Java/Spring Boot integration.

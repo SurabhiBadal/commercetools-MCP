@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: commercetools-mcp-server
+
+# commercetools Configuration
+commercetools:
+  project-key: ${CTP_PROJECT_KEY}
+  client-id: ${CTP_CLIENT_ID}
+  client-secret: ${CTP_CLIENT_SECRET}
+  auth-url: ${CTP_AUTH_URL:https://auth.us-central1.gcp.commercetools.com}
+  api-url: ${CTP_API_URL:https://api.us-central1.gcp.commercetools.com}
+  scopes: >
+    manage_customers:${commercetools.project-key}
+    view_customers:${commercetools.project-key}
+    manage_products:${commercetools.project-key}
+    view_products:${commercetools.project-key}
+    manage_orders:${commercetools.project-key}
+    view_orders:${commercetools.project-key}
+    manage_payments:${commercetools.project-key}
+    view_payments:${commercetools.project-key}
+
+# MCP Server Configuration
+spring:
+  ai:
+    mcp:
+      server:
+        transport: stdio
+        name: commercetools-mcp-tools
+        version: 2.0.0
+
+# Logging
+logging:
+  level:
+    root: INFO
+    com.commercetools: DEBUG
+    org.springframework.ai: DEBUG
