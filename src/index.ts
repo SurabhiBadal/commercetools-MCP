@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+
 
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -7,7 +7,7 @@ import {
     ListToolsRequestSchema,
 } from '@modelcontextprotocol/sdk/types.js';
 
-// Import customer tools
+
 import {
     customerCreateTool,
     handleCustomerCreate,
@@ -17,7 +17,7 @@ import {
     handleCustomerUpdate,
 } from './tools/customer/index.js';
 
-// Import customer group tools
+
 import {
     customerGroupCreateTool,
     handleCustomerGroupCreate,
@@ -27,13 +27,13 @@ import {
     handleCustomerGroupUpdate,
 } from './tools/customer-group/index.js';
 
-// Import product search tools
+
 import {
     productSearchTool,
     handleProductSearch,
 } from './tools/product-search/index.js';
 
-// Import products tools
+
 import {
     productsCreateTool,
     handleProductsCreate,
@@ -43,7 +43,7 @@ import {
     handleProductsUpdate,
 } from './tools/products/index.js';
 
-// Import product selection tools
+
 import {
     productSelectionCreateTool,
     handleProductSelectionCreate,
@@ -53,7 +53,7 @@ import {
     handleProductSelectionUpdate,
 } from './tools/product-selection/index.js';
 
-// Import product tailoring tools
+
 import {
     productTailoringCreateTool,
     handleProductTailoringCreate,
@@ -63,7 +63,7 @@ import {
     handleProductTailoringUpdate,
 } from './tools/product-tailoring/index.js';
 
-// Import product type tools
+
 import {
     productTypeCreateTool,
     handleProductTypeCreate,
@@ -73,13 +73,13 @@ import {
     handleProductTypeUpdate,
 } from './tools/product-type/index.js';
 
-// Import project tools
+
 import {
     projectReadTool,
     handleProjectRead,
 } from './tools/project/index.js';
 
-// Import order tools
+
 import {
     orderCreateTool,
     handleOrderCreate,
@@ -89,7 +89,7 @@ import {
     handleOrderUpdate,
 } from './tools/order/index.js';
 
-// Import payment tools
+
 import {
     paymentCreateTool,
     handlePaymentCreate,
@@ -99,7 +99,6 @@ import {
     handlePaymentUpdate,
 } from './tools/payment/index.js';
 
-// Create MCP server
 const server = new Server(
     {
         name: 'commercetools-mcp-tools',
@@ -151,14 +150,14 @@ const tools = [
     paymentUpdateTool,
 ];
 
-// Handle list_tools request
+
 server.setRequestHandler(ListToolsRequestSchema, async () => {
     return {
         tools,
     };
 });
 
-// Handle call_tool request
+
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
     const { name, arguments: args } = request.params;
 
@@ -250,7 +249,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 });
 
-// Start the server
+
 async function main() {
     const transport = new StdioServerTransport();
     await server.connect(transport);
